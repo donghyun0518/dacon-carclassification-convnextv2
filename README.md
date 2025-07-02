@@ -1,60 +1,69 @@
 <h1 style="text-align: center;">🚗HAI(하이)! - Hecto AI Challenge : 2025 상반기 헥토 채용 AI 경진대회</h1>
-<hr>
-<p style="text-align: center;">
-    <a href="https://github.com/donghyun0518/final-project-endoscope/blob/main/%EB%82%B4%EC%8B%9C%EA%B2%BD%EB%AA%A8%EB%8D%B8pdf.pdf" target="_blank">
-        <img src="https://github.com/donghyun0518/final-project-endoscope/blob/main/%EC%8B%A4%EC%8B%9C%EA%B0%84%EB%82%B4%EC%8B%9C%EA%B2%BD%ED%91%9C%EC%A7%80.png" alt="Project Cover" style="width: 1000px; border: 1px solid #c9d1d9; border-radius: 8px;">
-    </a>
-</p>
 
-[[프로젝트 발표 자료](https://github.com/donghyun0518/final-project-endoscope/blob/main/%EB%82%B4%EC%8B%9C%EA%B2%BD%EB%AA%A8%EB%8D%B8pdf.pdf)]
 
 ## 🔍 프로젝트 개요
 - **목적** : 중고차 이미지로부터 차량의 정확한 차종(총 396개)을 분류하는 AI 모델 개발
-- **주제** : 실생활에 밀접한 중고차 거래 및 차량 인식 시스템을 위한 고성능 이미지 분류기 설
-- **기간** : 2025.05.19 ~ 2025.06.16 (약 1달)
+- **주제** : 실생활에 밀접한 중고차 거래 및 차량 인식 시스템을 위한 고성능 이미지 분류기 설계
+- **기간** : 2025.05.19 ~ 2025.06.16 (약 4주간)
 - **팀 구성** : 3인
+- **수행 역할** : 데이터 전처리, 모델 학습 파이프라인 구축, 실험 전략 설계 및 성능 개선
 
 ## ⚙️ 주요 수행 과정
 **1. **문제 정의****
-   - 위/ 대장 내시경 검사 중 의료진의 병변 발견을 보조하는 실시간 AI 시스템 필요성 확인.
-   - 병변의 종류(용종, 궤양, 암) 및 탐지 정확도를 주요 지표로 설정.
+   - 다양한 연식, 모델, 색상, 촬영 조건에서 중고차 이미지가 수집되어 **고정된 패턴이 없고 불균형한 데이터셋 구조** 확인
+   - **Log Loss 기반 평가 지표**에 따라 모델은 단순 정확도보다 **확률 기반 예측의 신뢰도**가 중요
 
 **2. **데이터 수집 및 전처리****
-   - 데이터 출처 : AI Hub 내시경 이미지 합성데이터
-   - 전처리 작업
-     - 이미지 크기 통일화
-     - 라벨링 json 파일에서 사용할 라벨링 형식(바운딩 박스) 추출
+   - **데이터 구성**:
+     - train : 396개 클래스별 폴더(총 33,137장)
+     - test : 테스트 이미지 8,258장
+     - test.csv, sample_submission.csv : 추론 결과 제출 형식 포함
 
-**3. **모델 설계****
-   - 모델 선정 : YOLOv8m 기반의 실시간 객체 탐지 모델 활용
-   - 모델 학습:
-     - 데이터셋을 훈련, 검증, 테스트 데이터로 분할
-     - 크로스엔트로피 손실 함수와 Adam 옵티마이저를 사용해 학습진행.
-     - CUDA를 활용하여 모델 학습진행.
-   - 평가 지표 :
-     - 정확도(Precision), 재현율(Recall), F1 Score 및 mAP50(Mean Average Precision)으로 성능 평가.
+   - 전처리 작업:
+     - 클래스명 한글 -> 영문 변환 후 매핑 파일 제작
+     - 이미지 크기 분포 분석
+     - 입력 해상도 512x512로 통일화
+     - 클래스별 이미지 수 분석 -> 전체 클래스 50~80장 분포 확인 -> 클래스 수 대비 적은 데이터이므로 데이터 증강으로 보완
 
-**4. 모델 테스트 및 결과 분석**
-   - 테스트 데이터셋을 통해 모델의 병변 탐지 정확도 확인.
-   - 위/대장 두 장기를 동시에 학습시킬 시 현재 부위가 위인지 대장인지 구분하지 못하는 문제 발견
-     - 해결 방법 :
-       - 위와 대장을 따로 학습시켜 인터페이스 구현 시 선택 가능하도록 설계
-   - 정확도 확인 결과 :
-     - 대장
-       - Precision : 0.74 , Recall : 0.699, mAP50 : 0.72
-     - 위
-       - Precision : 0.75 , Recall : 0.63, mAP50 : 0.69
+**3. **모델 설계 및 학습****
+   - **사용 모델**:
+     - ConvNeXtV2-Base (384)
+       - 사전학습: ImageNet-22K -> 1K
+       - 공개일: 2023년 (대회 규정 준수)
+       - 적은 데이터에도 강건하고, 차량 디테일 인식에 유리한 구조
+   - **적용 기법**:
+     - 이미지 증강 : AutoAugment, RandomAugment, Cutout (timm 증강 라이브러리, Torchvision)
+     - 혼합 기법 : Mixup, CutMix
+     - 최적화 : EarlyStopping, EMA, SWA
+     - 스케줄러 : Warmup + CosineAnnealing, ReduceLROnPlateau 등 실험
+     - 기타 : Label Smoothing, Temperature Scaling
+   - **학습 환경**:
+     - GPU : RTX A6000 (VRAM 48GB, RunPod 환경)
+     - Batch size: 96, Image size: 512x512
 
-**5. 인터페이스 및 홈페이지 구현**<br>
-    [![유튜브에서 시연 영상보기](https://github.com/donghyun0518/final-project-endoscope/blob/main/%EB%82%B4%EC%8B%9C%EA%B2%BD%EC%8B%9C%EC%97%B0%EC%98%81%EC%83%81%ED%91%9C%EC%A7%80.png)](https://www.youtube.com/watch?v=94uCWk3kKMI)
-    [이미지 클릭시 유튜브에서 시청 가능합니다.]
+**4. 모델 평가 및 결과 분석**
+   - **평가 지표**:
+     - Log Loss (정답 클래스 확률 정밀도 중심 평가)
+     - 보조 지표 : Accuracy, Top-K Acc, Confidence Gap, Entropy
+   - **결과 요약**:
+     - 최고 성능 모델 Log Loss: 0.0605
+     - LB 제출시 Log Loss: 0.13318
+
+**5. 추론 및 앙상블**
+   - Test-Time Augmentation (TTA) 적용
+   - Soft Voting 기반 앙상블 방식 도입 (다중 모델 학률 평균)
+   - 클래스 확률 분포 CSV 저장 후 제출
+   - 최종 제출 결과 Log Loss: 0.1165372043 (Public LB 기준)
    
-**6. 한계점**
-   - 병변의 종류가 적어 다양한 병변 탐지 불가능
-   - 개인 컴퓨터의 성능 제한으로 인해 더 큰 YOLO 모델에 적용하지 못함.
+**6. 배포 및 활용 가능성**
+   - 사내 차량 관리, 차량 자동 식별, 중고차 판매 플랫폼에 활용 가능
+   - ONNX/TensorRT로 최적화 시 실시간 추론도 가능
+   - 모델 압축 및 경량화도 향수 과제로 설정 가능
 
-## 🧑🏻‍💻환경
-- Python
-- VScode
-- CUDA
+## 🧑🏻‍💻기술 스택
+- 프로그래밍: Python, PyTorch, torchvision, timm
+- 데이터 처리: pandas, numpy
+- 시각화: matplotlib, seaborn
+- 증강/최적화: timm, torch_augmentations, tqdm
+- 실행 환경: RunPod (Ubuntu 20.04, CUDA 12.4, RTX A6000)
 
