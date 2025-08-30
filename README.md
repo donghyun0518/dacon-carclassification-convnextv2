@@ -1,5 +1,12 @@
 <h1 style="text-align: center;">🚗HAI(하이)! - Hecto AI Challenge : 2025 상반기 헥토 채용 AI 경진대회</h1>
+<hr>
+<p style="text-align: center;">
+    <a href="https://github.com/donghyun0518/dacon-power-consumption-xgboost-catboost-lightgbm/blob/main/%EC%A0%84%EB%A0%A5%20(1).pdf" target="_blank">
+        <img src="https://github.com/donghyun0518/dacon-power-consumption-xgboost-catboost-lightgbm/blob/main/power_consuption_main.png" alt="Project Cover" style="width: 1000px; border: 1px solid #c9d1d9; border-radius: 8px;">
+    </a>
+</p>
 
+[프로젝트 발표 자료](https://github.com/donghyun0518/dacon-power-consumption-xgboost-catboost-lightgbm/blob/main/%EC%A0%84%EB%A0%A5%20(1).pdf)
 
 ## 🔍 프로젝트 개요
 - **목적** : 중고차 이미지로부터 차량의 정확한 차종(총 396개)을 분류하는 AI 모델 개발
