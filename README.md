@@ -2,7 +2,7 @@
 <hr>
 <p style="text-align: center;">
     <a href="https://github.com/donghyun0518/dacon-carclassification-convnextv2/blob/main/%EC%B0%A8%EB%9F%89%20(2).pdf" target="_blank">
-        <img src="https://github.com/donghyun0518/dacon-power-consumption-xgboost-catboost-lightgbm/blob/main/power_consuption_main.png" alt="Project Cover" style="width: 1000px; border: 1px solid #c9d1d9; border-radius: 8px;">
+        <img src="https://github.com/donghyun0518/dacon-carclassification-convnextv2/blob/main/car_classifier_main.png" alt="Project Cover" style="width: 1000px; border: 1px solid #c9d1d9; border-radius: 8px;">
     </a>
 </p>
 
